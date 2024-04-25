@@ -1,0 +1,52 @@
+SELECT bJCCD.[JCCo]
+	  ,bJCCD.Mth
+      ,bJCCD.[Job]
+      ,Concat(bJCCD.[Phase],' - ',bJCJP.Description) as Phase
+      ,bJCCD.[CostType]
+      ,bJCCD.[Source]
+	  ,bJCCD.[Description]
+	  ,Concat(bJCCD.Employee, ' - ', bPREH.FirstName, ' ',bPREH.LastName) as Employee
+      ,bJCCD.[Craft]
+      ,Concat(bJCCD.[Vendor], ' - ', bAPVM.Name) as Vendor
+	  ,bJCCD.APTrans
+	  ,bJCCD.APLine
+      ,bJCCD.[APRef]
+      ,bJCCD.[PO]
+      ,bJCCD.[UM]
+	  ,Concat(bJCCD.[EMEquip], ' - ',bEMEM.Description) as Equipment 
+      ,Sum(bJCCD.[ActualHours]) as Hours
+      ,Sum(bJCCD.[ActualUnits]) as Units
+      ,Sum(bJCCD.[ActualCost]) as Cost
+  FROM [Viewpoint].[dbo].[bJCCD]
+  Left Join bJCJP on bJCCD.[JCCo] = bJCJP.[JCCo] and bJCCD.[Job] = bJCJP.[Job] and bJCCD.[Phase] = bJCJP.[Phase]
+  Left Join bAPVM on bAPVM.VendorGroup = bJCCD.[JCCo] and bAPVM.Vendor = bJCCD.Vendor
+  left Join bPREH on bPREH.[JCCo] = bJCCD.[JCCo] and bPREH.Employee = bJCCD.Employee
+  Left Join bEMEM on bEMEM.EMCo = bJCCD.[JCCo] and bEMEM.Equipment = bJCCD.[EMEquip]
+  Where bJCCD.JCCo = 1 and bJCCD.Job IN ('19671S-', '19672S-', '19673S-', '19674S-', '19675S-', 
+              '21011M-', '22012M-', '22013M-', '22014M-', '22016M-', 
+              '22017M-', '22018M-', '22019M-', '22020M-', '22021M-', 
+              '22022M-', '22022S-', '22023M-', '22024M-', '22025M-', 
+              '22026M-', 'M18002-', 'M19004-', 'M19007-', 'M19008-', 'M22013-','18668S-','19004M-','19005M-','19008M-')
+
+ and bJCCD.[ActualCost] ! = 0
+  Group by bJCCD.[JCCo]
+	  ,bJCCD.Mth
+      ,bJCCD.[Job]
+      ,bJCCD.[Phase]
+	  ,bJCJP.Description
+      ,bJCCD.[CostType]
+      ,bJCCD.[Source]
+	  ,bJCCD.[Description]
+	  ,bJCCD.Employee
+	  ,bPREH.FirstName
+	  ,bPREH.LastName
+      ,bJCCD.[Craft]
+      ,bJCCD.[Vendor]
+	  ,bAPVM.Name
+	  ,bJCCD.APTrans
+	  ,bJCCD.APLine
+      ,bJCCD.[APRef]
+      ,bJCCD.[PO]
+	  ,bJCCD.[EMEquip]
+	  ,bEMEM.Description
+      ,bJCCD.[UM]

@@ -1,0 +1,21 @@
+SELECT Concat(bPREH.FirstName, ' ', bPREH.LastName) as Employee_Name
+       ,bPRSQ.[Employee]
+      ,bPRSQ.[PREndDate]
+      ,bPRSQ.[PayMethod]
+      ,bPRSQ.[CMRef]
+      ,bPRSQ.[PaidDate]
+      ,Sum([Hours]) as Hours
+      ,Sum([Earnings]) as Earnings
+      ,Sum([Dedns]) as Deductions
+	  ,(Sum([Earnings])-Sum([Dedns])) as Pay_Net
+  FROM [Viewpoint].[dbo].[bPRSQ]
+  Left Join bPREH on bPREH.[PRCo] = bPRSQ.[PRCo] and bPREH.[Employee] =  bPRSQ.[Employee]
+  Where bPRSQ.PRCo = 1 and bPRSQ.PREndDate between '2019-03-02' and '2023-12-30' and bPRSQ.PRGroup = 100 
+  Group by 
+       bPRSQ.[Employee]
+      ,bPRSQ.[PREndDate]
+      ,bPRSQ.[PayMethod]
+      ,bPRSQ.[CMRef]
+      ,bPRSQ.[PaidDate]
+	  ,bPREH.FirstName
+	  ,bPREH.LastName

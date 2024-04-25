@@ -1,0 +1,65 @@
+SELECT Concat(bPREH.FirstName, ' ', bPREH.LastName) as Employee_Name
+      ,bPRTH.[Employee] as EmployeeID
+      ,bPRTH.[PREndDate] as Week_Ending
+	  ,Concat (bPRCM.Description ,' ' ,bPRCC.Description) as Description
+      ,bPRTH.[Job] as Job 
+	  ,bJCJM.MailCity as City
+	  ,bPRTH.[EarnCode] as EarnCode
+	  ,Sum(bPRTH.[Hours]) as Hours
+	  ,bPRTH.[Rate]
+      ,Sum(bPRTH.[Amt]) as Amount
+  FROM [Viewpoint].[dbo].[bPRTH]
+  Left Join bPREH on bPREH.[PRCo] = bPRTH.[PRCo] and bPREH.[Employee] =  bPRTH.[Employee]
+  Left Join bPRCM on bPRCM.[PRCo] = bPRTH.[PRCo] and bPRCM.[Craft] = bPRTH.[Craft]
+  Left Join bPRCC on bPRCC.[PRCo] = bPRTH.[PRCo] and bPRCC.[Craft] = bPRTH.[Craft] and bPRCC.Class = bPRTH.[Class]
+  Left Join bJCJM on bJCJM.[JCCo] = bPRTH.[PRCo] and bJCJM.Job = bPRTH.[Job]
+  Where bPRTH.PRCo = 1 and bPRTH.PREndDate between '2019-03-02' and '2023-12-31' and bPRTH.PRGroup = 100 
+  Group by  bPRTH.[PRCo]
+      ,bPRTH.[PRGroup]
+      ,bPRTH.[PREndDate]
+      ,bPRTH.[Employee]
+      ,bPRTH.[Job]
+      ,bPRTH.[Craft]
+      ,bPRTH.[Class]
+      ,bPRTH.[EarnCode]
+	  ,bPRTH.[Rate]
+	  ,bPREH.FirstName
+	  ,bPREH.LastName
+	  ,bPRCM.Description
+	  ,bPRCC.Description
+	  ,bJCJM.MailCity 
+	  ,bJCJM.MailZip
+ 
+Union ALL
+ 
+/****** Script for SelectTopNRows command from SSMS  ******/
+SELECT Concat(bPREH.FirstName, ' ', bPREH.LastName) as Employee_Name
+      ,bPRTA.[Employee] as EmployeeID
+      ,bPRTA.[PREndDate] as Week_Ending
+	  ,Concat (bPRCM.Description ,' ' ,bPRCC.Description) as Description
+      ,bPRTH.[Job] as Job 
+	  ,bJCJM.MailCity as City
+      ,bPRTA.[EarnCode] as EarnCode
+	  ,Sum(bPRTH.[Hours]) as Hours
+      ,bPRTA.[Rate]
+      ,Sum(bPRTA.[Amt]) as Amount
+  FROM [Viewpoint].[dbo].[bPRTA]
+  lEFT Join bPRTH on bPRTA.[PRCo] = bPRTH.[PRCo] and bPRTA.[PRGroup] = bPRTH.[PRGroup] and bPRTA.[PREndDate] = bPRTH.[PREndDate]
+            and bPRTA.[Employee] = bPRTH.[Employee] and bPRTA.[PaySeq] = bPRTH.[PaySeq] and bPRTA.[PostSeq] = bPRTH.[PostSeq]
+  Left Join bPREH on bPREH.[PRCo] = bPRTA.[PRCo] and bPREH.[Employee] =  bPRTA.[Employee]
+  Left Join bPRCM on bPRCM.[PRCo] = bPRTA.[PRCo] and bPRCM.[Craft] = bPRTH.[Craft]
+  Left Join bPRCC on bPRCC.[PRCo] = bPRTA.[PRCo] and bPRCC.[Craft] = bPRTH.[Craft] and bPRCC.Class = bPRTH.[Class]
+  Left Join bJCJM on bJCJM.[JCCo] = bPRTA.[PRCo] and bJCJM.Job = bPRTH.[Job]
+  Where [bPRTA].PRCo = 1 and [bPRTA].PREndDate between '2019-03-02' and '2023-12-31' and [bPRTA].PRGroup = 100 
+  Group by 
+       bPREH.FirstName
+	   ,bPREH.LastName
+      ,bPRTA.[Employee]
+      ,bPRTA.[PREndDate] 
+	  ,bPRCM.Description  
+	  ,bPRCC.Description
+      ,bPRTH.[Job] 
+	  ,bJCJM.MailCity 
+      ,bPRTA.[EarnCode]
+      ,bPRTA.[Rate]
+ 

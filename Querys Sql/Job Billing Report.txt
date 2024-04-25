@@ -1,0 +1,22 @@
+
+SELECT  [ARCo]
+      ,[Mth]
+      ,[ARTrans]
+      ,[ARTransType]
+      ,[Customer]
+      ,[Contract]
+      ,[Invoice]
+      ,[Source]
+      ,[TransDate]
+      ,[Description]
+      ,[Invoiced]
+      ,[Paid]
+      ,[Retainage]
+      ,[AmountDue]
+      ,[PayFullDate]
+  FROM [Viewpoint].[dbo].[bARTH]
+  Where ARCo = 1 and Contract  IN ('19671S-', '19672S-', '19673S-', '19674S-', '19675S-', 
+              '21011M-', '22012M-', '22013M-', '22014M-', '22016M-', 
+              '22017M-', '22018M-', '22019M-', '22020M-', '22021M-', 
+              '22022M-', '22022S-', '22023M-', '22024M-', '22025M-', 
+              '22026M-', 'M18002-', 'M19004-', 'M19007-', 'M19008-', 'M22013-','18668S-','19004M-','19005M-','19008M-')

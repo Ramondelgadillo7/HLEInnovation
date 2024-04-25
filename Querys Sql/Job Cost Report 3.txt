@@ -1,0 +1,41 @@
+SELECT bJCCD.[JCCo]
+      ,bJCCD.[Job]
+	  ,CAST(FORMAT(ActualDate, 'yyyy-MM') + '-01' AS DATE) AS Month
+	  ,bJCJP.Item
+	  ,bJCCI.Description as Item_Des
+      ,bJCCD.[Phase]
+	  ,bJCJP.Description
+      ,bJCCD.[CostType]
+      ,bJCCD.[Source]
+      ,bJCCD.[Craft]
+      ,bJCCD.[Vendor]
+	  ,bAPVM.Name
+      ,bJCCD.[APRef]
+      ,bJCCD.[PO]
+      ,bJCCD.[Description]
+      ,bJCCD.[UM]
+      ,Sum(bJCCD.[ActualHours]) as Hours
+      ,Sum(bJCCD.[ActualUnits]) as Units
+      ,Sum(bJCCD.[ActualCost]) as Cost
+  FROM [Viewpoint].[dbo].[bJCCD]
+  Left Join bJCJP on bJCCD.[JCCo] = bJCJP.[JCCo] and bJCCD.[Job] = bJCJP.[Job] and bJCCD.[Phase] = bJCJP.[Phase]
+  Left Join bJCCI on bJCCD.[JCCo] = bJCCI.[JCCo] and bJCCD.[Job] = bJCCI.Contract and bJCJP.Item = bJCCI.Item
+  Left Join bAPVM on bAPVM.VendorGroup = bJCCD.[JCCo] and bAPVM.Vendor = bJCCD.Vendor
+  Where bJCCD.JCCo = 1 and bJCCD.Job = '22686S-' and bJCCD.[ActualCost] ! = 0 and ActualDate <= '2024-03-31'
+  Group by bJCCD.[JCCo]
+      ,bJCCD.[Job]
+	  ,ActualDate
+	  ,bJCJP.Item
+	  ,bJCCI.Description
+      ,bJCCD.[Phase]
+	  ,bJCJP.Description
+      ,bJCCD.[CostType]
+      ,bJCCD.[ActualDate]
+      ,bJCCD.[Source]
+      ,bJCCD.[Craft]
+      ,bJCCD.[Vendor]
+	  ,bAPVM.Name
+      ,bJCCD.[APRef]
+      ,bJCCD.[PO]
+      ,bJCCD.[Description]
+      ,bJCCD.[UM]

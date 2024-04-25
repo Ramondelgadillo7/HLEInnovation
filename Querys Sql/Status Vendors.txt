@@ -1,0 +1,36 @@
+Alter view Status_Vendors as 
+SELECT 
+       CASE
+       When bAPTD.APCo = 1 THEN 'HLE'
+	   WHEN bAPTD.APCo = 3 THEN 'MEX'
+	   ELSE NULL
+	   END AS APCo
+	  ,CASE 
+			WHEN bAPTD.Status = 1 THEN '1- Unpaid'
+			WHEN bAPTD.Status = 2 THEN	'2- Retained'
+			WHEN bAPTD.Status = 3 THEN	'3- Paid'
+			ELSE null
+		END AS Status
+	  ,Concat(bAPTH.Vendor,'- ', bAPVM.Name) as Vendor
+	  ,bAPVM.udVendorType
+	  ,Min(bAPTH.InvDate) AS FirstInvDate
+	  , CASE
+        WHEN DATEDIFF(day, Min(bAPTH.InvDate), GETDATE()) <= 30 THEN 'A - ''In Good Standing'' <= 30 Days'
+        WHEN DATEDIFF(day, Min(bAPTH.InvDate), GETDATE()) >= 31 AND DATEDIFF(day, Min(bAPTH.InvDate), GETDATE()) <= 60 THEN 'B - ''At Risk'' 31-60 Days'
+        WHEN DATEDIFF(day, Min(bAPTH.InvDate), GETDATE()) >= 61 AND DATEDIFF(day, Min(bAPTH.InvDate), GETDATE()) <= 90 THEN 'C - ''At Risk'' 61-90 Days'
+        WHEN DATEDIFF(day, Min(bAPTH.InvDate), GETDATE()) >= 91 THEN 'D - ''On Hold'' +90 Days'
+        ELSE NULL
+    END AS AginAP
+	  ,DATEDIFF(day, Min(bAPTH.InvDate), GETDATE()) AS DaysDifference
+	  ,(Select bAPTH.APRef where bAPTH.InvDate=Min(bAPTH.InvDate)) as APRef
+
+  FROM [Viewpoint].[dbo].[bAPTD]
+  INNER Join bAPTH ON bAPTH.APCo = bAPTD.APCo AND bAPTH.Mth = bAPTD.Mth AND bAPTH.APTrans = bAPTD.APTrans
+  Left Join bAPVM on bAPVM.VendorGroup = bAPTD.APCo and bAPVM.Vendor = bAPTH.Vendor 
+  Where bAPTD.APCo = 1 and bAPTD.Status = 1 and bAPTD.Amount != 0
+
+  Group by bAPTD.APCo
+		   ,bAPTD.Status 
+	       ,bAPTH.Vendor
+		   ,bAPVM.Name
+		   ,bAPVM.udVendorType

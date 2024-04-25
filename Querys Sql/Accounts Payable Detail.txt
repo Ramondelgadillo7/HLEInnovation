@@ -1,0 +1,110 @@
+
+SELECT 
+      CASE
+        WHEN bAPTD.APCo = 1 THEN 'HLE'
+        WHEN bAPTD.APCo = 3 THEN 'MEX'
+        ELSE null
+	   END AS Company
+	  ,YEAR(bAPTD.Mth) AS Year
+	  ,CASE
+        WHEN Month(bAPTD.Mth)  = 1 THEN '01- January'
+        WHEN Month(bAPTD.Mth)  = 2 THEN '02- February'
+		WHEN Month(bAPTD.Mth)  = 3 THEN '03- March'
+		WHEN Month(bAPTD.Mth)  = 4 THEN '04- April'
+		WHEN Month(bAPTD.Mth)  = 5 THEN '05- May'
+		WHEN Month(bAPTD.Mth)  = 6 THEN '06- June'
+		WHEN Month(bAPTD.Mth)  = 7 THEN '07- July'
+		WHEN Month(bAPTD.Mth)  = 8 THEN '08- August'
+		WHEN Month(bAPTD.Mth)  = 9 THEN '09- September'
+		WHEN Month(bAPTD.Mth)  = 10 THEN '10- October'
+		WHEN Month(bAPTD.Mth)  = 11 THEN '11- November'
+		WHEN Month(bAPTD.Mth)  = 12 THEN '12- December'
+        ELSE Null
+       END AS Month
+      ,bAPTD.APTrans
+      ,bAPTD.APLine
+	  ,bAPTD.APSeq
+	  ,CASE 
+			WHEN bAPTL.LineType = 1 THEN Concat(bAPTL.LineType,'- Job')
+			WHEN bAPTL.LineType = 2 THEN Concat(bAPTL.LineType,'- Inv')
+			WHEN bAPTL.LineType = 3 THEN Concat(bAPTL.LineType,'- Exp')
+			WHEN bAPTL.LineType = 4 THEN Concat(bAPTL.LineType,'- Equip')
+			WHEN bAPTL.LineType = 5 THEN Concat(bAPTL.LineType,'- EM WO')
+			WHEN bAPTL.LineType = 6 THEN Concat(bAPTL.LineType,'- PO')	
+			WHEN bAPTL.LineType = 7 THEN Concat(bAPTL.LineType,'- SL')
+			WHEN bAPTL.LineType = 8 THEN Concat(bAPTL.LineType,'- SM WO')
+			ELSE null
+		END AS LineType
+	  ,Concat(bAPTD.PayType,'- ',bAPPT.Description) as PayType
+	  ,CASE 
+			WHEN bAPTD.Status = 1 THEN '1- Unpaid'
+			WHEN bAPTD.Status = 2 THEN	'2- Retained'
+			WHEN bAPTD.Status = 3 THEN	'3- Paid'
+			ELSE null
+		END AS Status
+	  ,Concat(bAPTH.Vendor,'- ', bAPVM.Name) as Vendor
+	  ,Concat(bAPTH.APRef, ' - ',bAPTH.Description) as APRef
+	  ,bAPTH.InvDate
+	  ,bAPTH.Description as DescriptionAP
+      ,bAPTL.PO
+      ,bAPTL.Job
+      ,bAPTL.Phase
+	  ,CASE 
+			WHEN bAPTL.JCCType is null THEN Null
+			ELSE Concat(bAPTL.JCCType,'- ',bJCCT.Description) 
+		END AS CostType
+      ,bAPTL.Equip
+	  ,CASE 
+			WHEN bAPTL.CostCode is null THEN Null
+			ELSE Concat(bAPTL.CostCode,'- ',bEMCC.Description) 
+		END AS CostCode
+	  ,CASE 
+			WHEN bAPTL.EMCType is null THEN Null
+			ELSE Concat(bAPTL.EMCType,'- ',bEMCT.Description) 
+		END AS EMCType
+      ,(Concat(RTrim(bAPTL.GLAcct),'- ',bGLAC.Description)) as GLAcct
+      ,bAPTL.Description as DescriptionLine
+      ,bAPTL.UM
+      ,bAPTL.Units
+      ,bAPTL.UnitCost
+      ,bAPTD.Amount as AmountPayable
+	  ,CASE 
+			WHEN bAPTD.Status != 1 THEN 0
+			ELSE bAPTD.Amount
+		END AS AmountUnpaid
+      ,CASE 
+			WHEN bAPTD.Status != 2 THEN 0
+			ELSE bAPTD.Amount
+		END AS AmountRetained
+	  ,CASE 
+			WHEN bAPTD.Status != 3 THEN 0
+			ELSE bAPTD.Amount
+		END AS AmountPaid
+      ,bAPTD.DueDate
+      ,bAPTD.PaidMth
+      ,bAPTD.PaidDate
+      ,bAPTD.CMCo
+      ,bAPTD.CMAcct
+      ,bAPTD.PayMethod
+      ,bAPTD.CMRef
+      ,bAPTD.CMRefSeq
+      ,bAPTD.ReleaseDate
+      ,bAPTD.ReleaseBatchMonth
+      , CASE
+        WHEN DATEDIFF(day, bAPTH.InvDate, GETDATE()) <= 30 THEN 'A Current'
+        WHEN DATEDIFF(day, bAPTH.InvDate, GETDATE()) >= 31 AND DATEDIFF(day, bAPTH.InvDate, GETDATE()) <= 60 THEN 'B 31-60'
+        WHEN DATEDIFF(day, bAPTH.InvDate, GETDATE()) >= 61 AND DATEDIFF(day, bAPTH.InvDate, GETDATE()) <= 90 THEN 'C 61-90'
+        WHEN DATEDIFF(day, bAPTH.InvDate, GETDATE()) >= 91 THEN 'D +90'
+        ELSE NULL
+    END AS AginAP
+
+  FROM [Viewpoint].[dbo].[bAPTD]
+  INNER JOIN bAPTL ON bAPTL.APCo = bAPTD.APCo AND bAPTL.Mth = bAPTD.Mth AND bAPTL.APTrans = bAPTD.APTrans AND	bAPTL.APLine=bAPTD.APLine
+  INNER Join bAPTH ON bAPTH.APCo = bAPTD.APCo AND bAPTH.Mth = bAPTD.Mth AND bAPTH.APTrans = bAPTD.APTrans
+  Left Join bAPVM on bAPVM.VendorGroup = bAPTD.APCo and bAPVM.Vendor = bAPTH.Vendor 
+  Left join bAPPT ON bAPPT.APCo = bAPTD.APCo and bAPPT.PayType = bAPTD.PayType
+  Left Join bJCCT on bJCCT.PhaseGroup = bAPTD.APCo and bJCCT.CostType = bAPTL.JCCType
+  Left Join bEMCC on bEMCC.EMGroup = bAPTD.APCo and bEMCC.CostCode = bAPTL.CostCode
+  Left Join bEMCT on bEMCT.EMGroup = bAPTD.APCo and bEMCT.CostType = bAPTL.EMCType
+  Left Join bGLAC on bGLAC.GLCo = bAPTD.APCo and bGLAC.GLAcct = bAPTL.GLAcct
+  Where (bAPTD.APCo = 1 OR bAPTD.APCo = 3)

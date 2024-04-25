@@ -1,0 +1,34 @@
+
+SELECT bPRTH.[PRCo]
+      ,bPRTH.[PRGroup]
+      ,bPRTH.[PREndDate]
+      ,bPRTH.[Employee]
+      ,bPRTH.[PaySeq]
+      ,bPRTH.[PostSeq]
+      ,bPRTH.[PostDate]
+      ,bPRTH.[Job]
+      ,bPRTH.[Phase]
+      ,bPRTH.[Cert]
+      ,bPRTH.[EarnCode]
+      ,bPRTH.[Shift]
+	  ,bPRTH.[Rate]
+      ,bPRTH.[Hours]
+      ,bPRTH.[Amt] as AmtH
+	  ,bPRTA.Amt as AmtA
+	  ,(SELECT Sum(bPRTL.[Amt]) 
+        FROM [Viewpoint].[dbo].[bPRTL]
+        Where bPRTL.[PRCo] =  bPRTH.[PRCo] and bPRTL.[PRGroup] = bPRTH.[PRGroup] 
+                      and bPRTL.[PREndDate] = bPRTH.[PREndDate] and bPRTL.[Employee] = bPRTH.[Employee]
+                      and bPRTL.[PaySeq] = bPRTH.[PaySeq] and bPRTL.[PostSeq] = bPRTH.[PostSeq]
+        Group by [PRCo]
+        ,bPRTL.[PRGroup]
+        ,bPRTL.[PREndDate]
+        ,bPRTL.[Employee]
+        ,bPRTL.[PaySeq]
+        ,bPRTL.[PostSeq]) as AmountL
+  FROM [Viewpoint].[dbo].[bPRTH]
+  lEFT jOIN bPRTA on  bPRTA.[PRCo] =  bPRTH.[PRCo] and bPRTA.[PRGroup] = bPRTH.[PRGroup] 
+                      and bPRTA.[PREndDate] = bPRTH.[PREndDate] and bPRTA.[Employee] = bPRTH.[Employee]
+                      and bPRTA.[PaySeq] = bPRTH.[PaySeq] and bPRTA.[PostSeq] = bPRTH.[PostSeq]
+
+  Where bPRTH.PRCo = 1 and bPRTH.PREndDate = '2024-01-06' AND bPRTH.Employee != 10 AND bPRTH.[PRGroup]  = 100

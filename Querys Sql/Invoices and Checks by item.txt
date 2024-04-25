@@ -1,0 +1,62 @@
+SELECT 
+	CASE
+        WHEN bARTL.ARCo = 1 THEN 'HLE'
+	   END AS Company
+	,bARTH1.Customer
+	,bARTL.Mth
+	,bARTL.ApplyMth
+	,bARTL.ApplyTrans
+	,CASE
+	  WHEN bARTH2.ARTransType = 'I' Then 'Invoice'
+	  WHEN bARTH2.ARTransType = 'P' Then 'Payment'
+	  WHEN bARTH2.ARTransType = 'A' Then 'Adjustment'
+	 END AS TransType
+    ,bARTH1.Invoice
+	,bARTH2.Description as Invoice_Description
+	,bARTH2.TransDate as Inv_Date
+	,bARTH2.CheckNo
+	,bARTH2.CheckDate
+    ,bARTL.Contract
+    ,bARTL.Item
+	,bJCCI.Description as Description_Item
+	,Sum(bARTL.Amount) AS AMOUNT
+	,CASE
+        WHEN (bARTH2.ARTransType = 'I' or bARTH2.ARTransType = 'A') THEN Sum(bARTL.Amount)
+		ELSE NULL
+	  END AS Invoiced
+	,Sum(bARTL.Retainage) as Retainage
+	,CASE
+        WHEN bARTH2.ARTransType = 'P' THEN Sum(bARTL.Amount)
+		ELSE NULL
+	  END AS Paid
+	
+    
+FROM [Viewpoint].[dbo].[bARTL]
+INNER JOIN [Viewpoint].[dbo].[bARTH] AS bARTH1 
+    ON bARTH1.ARCo = bARTL.ARCo 
+    AND bARTH1.Mth = bARTL.ApplyMth 
+    AND bARTH1.ARTrans = bARTL.ApplyTrans
+INNER JOIN [Viewpoint].[dbo].[bARTH] AS bARTH2 
+    ON bARTH2.ARCo = bARTL.ARCo 
+    AND bARTH2.Mth = bARTL.Mth 
+    AND bARTH2.ARTrans = bARTL.ARTrans
+Inner join bJCCI ON bJCCI.JCCo = bARTL.ARCo 
+    and bJCCI.Item = bARTL.Item
+	AND bJCCI.Contract = bARTL.Contract
+WHERE  bARTL.Amount != 0  and bARTL.ARCo =1 and bARTL.Contract = '18665S-'
+group by 
+     bARTL.ARCo
+	,bARTH1.Customer
+	,bARTL.Mth
+	,bARTL.ApplyMth
+	,bARTL.ApplyTrans
+	,bARTH2.ARTransType 
+    ,bARTH1.Invoice
+	,bARTH2.Description 
+	,bARTH2.TransDate 
+	,bARTH2.CheckNo
+	,bARTH2.CheckDate
+    ,bARTL.Contract
+    ,bARTL.Item
+	,bJCCI.Description 
+Order by bARTL.ApplyMth,ApplyTrans,Mth
